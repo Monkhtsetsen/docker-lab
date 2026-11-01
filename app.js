@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
   res.send(`
     <h1>Hello Docker!</h1>
     <p>My first Dockerized Node.js application.</p>
-    <p>Container is running successfully!</p>
+    <p>My Docker application is running successfully!</p>
     <p>Database: MySQL</p>
   `);
 });
