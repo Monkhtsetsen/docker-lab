@@ -1,18 +1,25 @@
 const express = require("express");
-const { Pool } = require("pg");
+const mysql = require("mysql2/promise");
 
 const app = express();
 const PORT = 3000;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "dockerlab",
+  password: process.env.DB_PASSWORD || "dockerlab_password",
+  database: process.env.DB_NAME || "dockerlab_db",
+  port: 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
 });
 
-app.get("/", async (req, res) => {
+app.get("/", (req, res) => {
   res.send(`
     <h1>Hello Docker!</h1>
     <p>My first Dockerized Node.js application.</p>
     <p>Container is running successfully!</p>
+    <p>Database: MySQL</p>
   `);
 });
 
@@ -25,13 +32,16 @@ app.get("/health", (req, res) => {
 
 app.get("/db", async (req, res) => {
   try {
-    const result = await pool.query("SELECT NOW()");
+    const [rows] = await pool.query("SELECT NOW() AS db_time");
+
     res.json({
       database: "Connected",
-      time: result.rows[0].now,
+      type: "MySQL",
+      time: rows[0].db_time,
     });
   } catch (error) {
     console.error("Database connection failed:", error.message);
+
     res.status(500).json({
       database: "Disconnected",
       error: error.message,
